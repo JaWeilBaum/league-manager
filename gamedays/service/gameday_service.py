@@ -275,14 +275,29 @@ class GamedayGameService:
         parts = time_string.split(':')
         return ':'.join([parts[0], f'{parts[-1]:0>2}'])
 
-    def get_halftime_split_score_table(self):
+    def get_halftime_split_score_table(self) -> (pd.DataFrame, bool):
         events = self._prepare_team_logs()
+        split_score_repaired = False
 
         ct = pd.crosstab(events.team__description, events.half, events.value, aggfunc='sum')
         ct["final"] = ct.sum(axis=1)
         ct = ct.rename_axis(None, axis=1).reset_index()
 
-        return ct.rename(columns=self._split_score_column_mapping)[self.split_score_output_columns]
+        if len(ct.columns) != 4:
+            ct = self._repair_broken_split_score(ct)
+            split_score_repaired = True
+
+        return ct.rename(columns=self._split_score_column_mapping)[self.split_score_output_columns], split_score_repaired
+
+    def _repair_broken_split_score(self, split_score_ct: pd.DataFrame) -> pd.DataFrame:
+        split_score_columns = set(split_score_ct.columns)
+        missing_columns = set(self._split_score_column_mapping.keys()) - split_score_columns
+
+        for col_name in missing_columns:
+            split_score_ct[col_name] = 0
+
+        return split_score_ct
+
 
     def get_events_table(self):
         events = self._prepare_team_logs()
