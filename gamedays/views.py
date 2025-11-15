@@ -212,7 +212,7 @@ class GamedayGameDetailView(DetailView):
         }
         classes = ['table', 'table-hover', 'table-condensed', 'table-responsive', 'text-center']
 
-        split_score_table, split_score_repaired = ggs.get_halftime_split_score_table()
+        split_score_table, split_score_repaired = ggs.get_split_score_table()
 
         split_score_table_html = split_score_table.to_html(**{
             **render_configs,

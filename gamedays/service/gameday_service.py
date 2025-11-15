@@ -209,7 +209,7 @@ class EmptyGamedayGameService:
 
 
     @staticmethod
-    def get_halftime_split_score_table() -> (pd.DataFrame, bool):
+    def get_split_score_table() -> (pd.DataFrame, bool):
         return EmptySplitScoreTable, True
 
     @staticmethod
@@ -245,12 +245,16 @@ class GamedayGameService:
             self.events_ready = True
             self.events = self._prepare_team_logs()
 
-        self.home_team_name = self.gameresult.iloc[1]['team__description']
-        self.home_team_id = self.gameresult.iloc[1]['team']
-        self.away_team_name = self.gameresult.iloc[0]['team__description']
-        self.away_team_id = self.gameresult.iloc[0]['team']
+        self.home_team_name = "Home Team"
+        self.home_team_id = 0
+        self.away_team_name = "Away Team"
+        self.away_team_id = 0
 
-
+        if len(self.gameresult) > 0:
+            self.home_team_name = self.gameresult.iloc[1]['team__description']
+            self.home_team_id = self.gameresult.iloc[1]['team']
+            self.away_team_name = self.gameresult.iloc[0]['team__description']
+            self.away_team_id = self.gameresult.iloc[0]['team']
 
         self._score_column_mapping = {
             # "created_time": "Zeit",
@@ -315,7 +319,7 @@ class GamedayGameService:
         parts = time_string.split(':')
         return ':'.join([parts[0], f'{parts[-1]:0>2}'])
 
-    def get_halftime_split_score_table(self) -> (pd.DataFrame, bool):
+    def get_split_score_table(self) -> (pd.DataFrame, bool):
         if not self.events_ready:
             return EmptySplitScoreTable, True
 
