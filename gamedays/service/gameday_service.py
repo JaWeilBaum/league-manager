@@ -32,7 +32,8 @@ SCHEDULE_TABLE_HEADERS = {
     OFFICIALS_NAME: 'Officials',
     STANDING: 'Platz',
     STAGE: 'Runde',
-    STATUS: 'Status'
+    STATUS: 'Status',
+    GAMEINFO_ID: 'Rückblick',
 }
 
 
@@ -181,7 +182,7 @@ class GamedayService:
 
     @staticmethod
     def _get_game_detail_button(gameday_pk: int, gameinfo_id: int):
-        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel</a>"""
+        return f"""<a href="game/{gameinfo_id}" class="btn btn-primary">Zum Spiel<i class="bi bi-chevron-right"></i></a>"""
 
 
 class EmptyGamedayGameService:

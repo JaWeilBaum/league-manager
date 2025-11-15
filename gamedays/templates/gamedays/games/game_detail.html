@@ -10,12 +10,16 @@
     width: 25%;
 }
 </style>
-<a href="{% url 'league-gameday-detail' pk=object.gameday.pk%}" class="btn btn-primary">
-    <span>Zurück zum Spieltag</span>
-</a>
+
+<div class="d-flex justify-content-between align-items-center me-2">
+    <a href="{% url 'league-gameday-detail' pk=object.gameday.pk%}" class="btn btn-primary">
+        <span><i class="bi bi-chevron-left"></i>Zurück zum Spieltag</span>
+    </a>
+</div>
 <div class="d-flex justify-content-between align-items-center">
     <h1>Spiel Übersicht: <b>{{ info.home_team }}</b> vs. <b>{{ info.away_team }}</b></h1>
 </div>
+
 {% endif %}
 
 
