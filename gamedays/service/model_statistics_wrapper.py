@@ -51,7 +51,10 @@ class LeagueStatisticsModelWrapper:
         self.gameday_ids = list(map(lambda x: x[0],
                                     Gameday.objects.filter(
                                         season__name=self.season,
-                                        league__name=self.league)
+                                        league__name=self.league,
+                                    )
+                                    .exclude(name__icontains="Relegation")
+                                    .exclude(name__icontains="Final")
                                     .values_list("id")))
 
         # TODO: Filter out gameday containing 'Relegation' or 'Final'
@@ -85,6 +88,11 @@ class LeagueStatisticsModelWrapper:
             aggfunc='count'
         ).fillna(0).astype(int)
 
+        missing_columns = set(INDIVIDUAL_STATISTIC_EVENTS) - set(self.player_aggregation.columns)
+        for missing_column in missing_columns:
+            self.player_aggregation[missing_column] = 0
+
+
     def _aggregate_team_events(self):
         self.team_aggregation = pd.crosstab(
             index=self.team_logs.team__name,
@@ -92,6 +100,10 @@ class LeagueStatisticsModelWrapper:
             values=self.team_logs.id,
             aggfunc='count'
         ).fillna(0).astype(int)
+
+        missing_columns = set(TEAM_LOG_COLUMNS) - set(self.team_aggregation.columns) - {"team__name"}
+        for missing_column in missing_columns:
+            self.team_aggregation[missing_column] = 0
 
     def _get_top_event_players(self, event: str, top: int) -> pd.DataFrame:
         relevant_column = self.player_aggregation[[event]].sort_values(event, ascending=False).head(top).copy()
@@ -187,4 +199,3 @@ class LeagueStatisticsModelWrapper:
             "1-Extra-Punkt": "1-XP",
             "2-Extra-Punkte": "2-XP",
         })
-
