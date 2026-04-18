@@ -20,6 +20,7 @@ from django.views.generic import (
 )
 from formtools.wizard.views import SessionWizardView
 
+from gamedays.service.gameday_service import GamedayService
 from league_manager.utils.url_service import UrlService
 from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
 from league_table.models import LeagueSeasonConfig, OverrideOfficialGamedaySetting
@@ -33,6 +34,8 @@ from .constants import (
 )
 
 from gamedays.models import Gameday, Gameinfo
+from .service.matchreport_service import MatchreportService
+
 
 # Create your views here.
 class MatchreportGamedayListView(View):
@@ -63,3 +66,53 @@ class MatchreportGamedayListView(View):
                 "season_year_league_pattern": MATCHREPORT_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
             },
         )
+
+class MatchreportGamedayDetailView(DetailView):
+    template_name = "matchreport/gameday_detail.html"
+    model = Gameday
+
+    def get_context_data(self, **kwargs):
+        context = super(MatchreportGamedayDetailView, self).get_context_data()
+        gameday = context["gameday"]
+        ms = MatchreportService.create(gameday.pk)
+        render_configs = {
+            "index": False,
+            "classes": [
+                "table",
+                "table-hover",
+                "table-condensed",
+                "table-responsive",
+                "text-center",
+            ],
+            "border": 0,
+            "justify": "left",
+            "escape": False,
+            "table_id": "schedule",
+        }
+        if "officials" in settings.INSTALLED_APPS:
+            show_official_names = False
+            if self.request.user.is_staff:
+                show_official_names = True
+            from officials.service.signup_service import OfficialSignupService
+
+            officials = OfficialSignupService.get_signed_up_officials(
+                gameday.pk, show_official_names
+            )
+        else:
+            officials = []
+
+
+        passcheck_info_table = ""
+
+        if self.request.user.is_staff:
+            passcheck_info_table = ms.get_staff_passcheck_details().to_html(
+                **render_configs
+            )
+
+        context["info"] = {
+            "officials": officials,
+            "passcheck_info_table": passcheck_info_table,
+            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.name}&gameday={gameday.pk}",
+        }
+
+        return context

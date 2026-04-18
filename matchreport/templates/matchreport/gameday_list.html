@@ -20,11 +20,8 @@
 {% for gameday in gamedays %}
 <article class="media content-section">
     <div class="media-body">
-        <div class="article-metadata">
-            <a class="mr-2" href="{% url 'league-gameday-detail' gameday.id %}">{{ gameday.date }}</a> - {{gameday.league.name}}
-        </div>
-        <h2><a class="article-title" href="{% url 'league-gameday-detail' gameday.id %}">{{ gameday.name }}</a></h2>
-        <p class="article-content"></p>
+        <i class="bi bi-list-columns-reverse"></i>
+        <a class="mr-2" href="{% url 'matchreport-gameday-detail' gameday.id %}">{{ gameday.name }} am {{ gameday.date }}</a> {{gameday.league.name}}
     </div>
 </article>
 {% endfor %}
