@@ -142,6 +142,8 @@ class MachtreportModelWrapper:
             )
         )
 
+        teamlogs.created_time = teamlogs.created_time.apply(lambda x: x.strftime("%H:%M:%S"))
+
         return teamlogs.rename(columns=column_mapping)
 
     def _get_game_officials_table(self, gameinfo: str):
