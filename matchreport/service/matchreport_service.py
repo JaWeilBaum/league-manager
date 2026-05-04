@@ -1,4 +1,4 @@
-from gamedays.models import Gameinfo
+from gamedays.models import Gameinfo, GameSetup
 from gamedays.service.gameday_service import EMPTY_DATA
 from matchreport.service.model_wrapper import MachtreportModelWrapper
 
@@ -27,7 +27,26 @@ class MatchreportService:
         self.mmw = MachtreportModelWrapper(pk)
         self.gameday_pk = pk
 
+    def get_passcheck_player_details(self):
+        return self.mmw.passcheck_player_details_df
 
     def get_staff_passcheck_details(self):
-        return self.mmw.get_staff_passcheck_details(self.gameday_pk)
+        return self.mmw.get_staff_passcheck_details()
+
+    def get_gameday_match_reports(self, render_config):
+        return self.mmw.get_gameday_match_report(render_config=render_config)
+
+    def get_staff_game_end_notes(self, gameinfo: str):
+        return (
+            GameSetup.objects.filter(gameinfo=gameinfo)
+            .values(
+                *[
+                    "gameinfo__officials__name",
+                    "homeCaptain",
+                    "awayCaptain",
+                    "note",
+                ]
+            )
+            .first()
+        )
 

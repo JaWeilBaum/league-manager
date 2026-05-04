@@ -3,7 +3,7 @@
 {% block content %}
 {% if user.is_staff %}
 {% if not request.GET.isExtern %}
-
+<h3><span class="badge bg-warning text-dark me-1" style="font-size: 0.65em; vertical-align: middle;">BETA</span>Spielberichtsbogen Lite</h3>
 <div class="d-flex justify-content-between align-items-center">
     <h1>{{ object.name }}</h1>
 </div>
@@ -32,6 +32,64 @@
         </div>
     </div>
 </div>
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapsePasscheckPlayer" aria-expanded="false" class="card-header" data-bs-target="#collapsePasscheckPlayer"
+         data-bs-toggle="collapse" id="headingPasscheckPlayer" role="button">
+        <h2>Passcheck Spieler</h2>
+    </div>
+    <div aria-labelledby="headingPasscheckPlayer" class="collapse" id="collapsePasscheckPlayer">
+        <div class="card-body">
+            {{ info.passcheck_player_table | safe }}
+        </div>
+    </div>
+</div>
+<div class="card" style="overflow: auto">
+    <div aria-controls="collapseGames" aria-expanded="false" class="card-header" data-bs-target="#collapseGames"
+         data-bs-toggle="collapse" id="headingGames" role="button">
+        <h2>Spiele</h2>
+    </div>
+    <div aria-labelledby="headingGames" class="collapse" id="collapseGames">
+        {% for game in info.gameday_match_reports %}
+        <div class="card">
+            <div aria-controls="collapse{{ game.gameinfo_id }}" aria-expanded="false" class="card-header"
+                 data-bs-target="#collapse{{ game.gameinfo_id }}" data-bs-toggle="collapse"
+                 id="heading{{ game.gameinfo_id }}" role="button">
+                <div class="card-title">
+                    <h5>{{ game.home.team_name }} {{ game.home.points_scored }} - {{ game.away.points_scored }} {{ game.away.team_name }}</h5>
+                </div>
+            </div>
+            <div aria-labelledby="heading{{ game.gameinfo_id }}" class="collapse" id="collapse{{ game.gameinfo_id }}">
+                <div class="card-body">
+                    <h5>Informationen</h5>
+                    <div class="row mb-1">
+                        <div class="col"><b>Status:</b> {{ game.game_status }}</div>
+                        <div class="col"><b>Officials (Team):</b> {{ game.officials }}</div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col"><b>Heim Kapitän:</b> {{ game.end_notes.homeCaptain }}</div>
+                        <div class="col"><b>Spielfeld:</b> {{ game.field }}</div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col"><b>Auswärts Kapitän:</b> {{ game.end_notes.awayCaptain }}</div>
+                        <div class="col"><b>Notiz:</b> {{ game.end_notes.note | safe }}</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5>Schiedsrichter Crew:</h5>
+                    {{ game.refs | safe }}
+                </div>
+                <div class="card-body">
+                    <h5>Strafen:</h5>
+                    {{ game.flags    | safe }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+
 
 {% endif %}
 {% include "partials/delete_modal.html" %}

@@ -1,31 +1,12 @@
 from datetime import datetime
 
-import pandas as pd
-from django.apps import apps
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Max
 from django.db.models.functions import ExtractYear
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse
-from django.utils.functional import cached_property
+from django.shortcuts import render
 from django.views import View
 from django.views.generic import (
     DetailView,
-    UpdateView,
-    CreateView,
-    FormView,
-    DeleteView,
-    TemplateView,
 )
-from formtools.wizard.views import SessionWizardView
-
-from gamedays.service.gameday_service import GamedayService
-from league_manager.utils.url_service import UrlService
-from league_table.constants import LEAGUE_TABLE_OVERALL_TABLE_BY_SLUG_AND_LEAGUE
-from league_table.models import LeagueSeasonConfig, OverrideOfficialGamedaySetting
-from league_table.service.leaguetable_repository import LeagueTableRepository
-from liveticker.constants import LIVETICKER_HOME
 
 from .constants import (
     MATCHREPORT_GAMEDAY_LIST_AND_YEAR_AND_LEAGUE,
@@ -103,16 +84,22 @@ class MatchreportGamedayDetailView(DetailView):
 
 
         passcheck_info_table = ""
-
         if self.request.user.is_staff:
             passcheck_info_table = ms.get_staff_passcheck_details().to_html(
                 **render_configs
             )
 
+        passcheck_player_table = ""
+        if self.request.user.is_staff:
+            passcheck_player_table = """<p>An diesem Speiltag gab es keine Passchecks</p>"""
+            if not ms.get_passcheck_player_details().empty:
+                passcheck_player_table = ms.get_passcheck_player_details().to_html(**render_configs)
+
         context["info"] = {
             "officials": officials,
             "passcheck_info_table": passcheck_info_table,
-            "url_pattern_liveticker": f"{UrlService.build_absolute_url(LIVETICKER_HOME)}?league={gameday.league.name}&gameday={gameday.pk}",
+            "passcheck_player_table": passcheck_player_table,
+            "gameday_match_reports": ms.get_gameday_match_reports(render_configs),
         }
 
         return context
